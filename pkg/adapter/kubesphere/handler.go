@@ -46,9 +46,20 @@ func GetEmail(request *restful.Request, response *restful.Response) {
 	var content bytes.Buffer
 	tmpl.Execute(&content, notificationParam)
 
+	emailContent := notification.EmailContent{
+		Html: content.String(),
+	}
+
+	emailContentBytes, err := json.Marshal(emailContent)
+
+	if err != nil {
+		logger.Error(nil, "Marshal Notification Content error: %v", err)
+		return
+	}
+
 	email := notification.Email{
 		Title:   "KubeSphere Notification",
-		Content: content.String(),
+		Content: string(emailContentBytes),
 	}
 
 	response.WriteAsJson(email)
