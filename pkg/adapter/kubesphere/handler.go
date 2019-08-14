@@ -13,6 +13,14 @@ import (
 	"kubesphere.io/alert/pkg/notification"
 )
 
+func parseBool(input string) bool {
+	if input == "true" {
+		return true
+	} else {
+		return false
+	}
+}
+
 func GetMetrics(request *restful.Request, response *restful.Response) {
 	metricParamStr := request.QueryParameter("metric_param")
 
@@ -30,6 +38,7 @@ func GetMetrics(request *restful.Request, response *restful.Response) {
 }
 
 func GetEmail(request *restful.Request, response *restful.Response) {
+	resume := parseBool(request.QueryParameter("resume"))
 	notificationParamStr := request.QueryParameter("notification_param")
 
 	notificationParam := notification.NotificationParam{}
@@ -41,7 +50,11 @@ func GetEmail(request *restful.Request, response *restful.Response) {
 	}
 
 	tmpl := template.New("email")
-	tmpl.Parse(constants.EmailKubeSphereNotifyTemplate)
+	if resume {
+		tmpl.Parse(constants.EmailKubeSphereNotifyResumeTemplate)
+	} else {
+		tmpl.Parse(constants.EmailKubeSphereNotifyActiveTemplate)
+	}
 
 	var content bytes.Buffer
 	tmpl.Execute(&content, notificationParam)
