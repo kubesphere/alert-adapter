@@ -32,6 +32,7 @@ func WebService() *restful.WebService {
 		Doc("Get Email Text").
 		Param(ws.QueryParameter("resume", "resume or active, true/false.").DataType("bool").DefaultValue("false").Required(false)).
 		Param(ws.QueryParameter("notification_param", "notification param specify").DataType("string").Required(false)).
+		Param(ws.QueryParameter("language", "language specify").DataType("string").Required(false)).
 		Metadata(restfulspec.KeyOpenAPITags, tags)).
 		Consumes(restful.MIME_JSON, constants.MIME_MERGEPATCH).
 		Produces(restful.MIME_JSON)

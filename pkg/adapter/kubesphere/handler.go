@@ -40,6 +40,7 @@ func GetMetrics(request *restful.Request, response *restful.Response) {
 func GetEmail(request *restful.Request, response *restful.Response) {
 	resume := parseBool(request.QueryParameter("resume"))
 	notificationParamStr := request.QueryParameter("notification_param")
+	language := request.QueryParameter("language")
 
 	notificationParam := notification.NotificationParam{}
 
@@ -51,9 +52,17 @@ func GetEmail(request *restful.Request, response *restful.Response) {
 
 	tmpl := template.New("email")
 	if resume {
-		tmpl.Parse(constants.EmailKubeSphereNotifyResumeTemplate)
+		if "en" == language {
+			tmpl.Parse(constants.EmailKubeSphereNotifyResumeTemplateEn)
+		} else {
+			tmpl.Parse(constants.EmailKubeSphereNotifyResumeTemplateZh)
+		}
 	} else {
-		tmpl.Parse(constants.EmailKubeSphereNotifyActiveTemplate)
+		if "en" == language {
+			tmpl.Parse(constants.EmailKubeSphereNotifyActiveTemplateEn)
+		} else {
+			tmpl.Parse(constants.EmailKubeSphereNotifyActiveTemplateZh)
+		}
 	}
 
 	var content bytes.Buffer
