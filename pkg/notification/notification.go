@@ -15,3 +15,7 @@ type Email struct {
 	Title   string `json:"title"`
 	Content string `json:"content"`
 }
+
+type EmailContent struct {
+	Html string `json:"html"`
+}

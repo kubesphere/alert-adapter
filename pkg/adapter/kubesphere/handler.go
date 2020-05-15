@@ -13,6 +13,14 @@ import (
 	"kubesphere.io/alert/pkg/notification"
 )
 
+func parseBool(input string) bool {
+	if input == "true" {
+		return true
+	} else {
+		return false
+	}
+}
+
 func GetMetrics(request *restful.Request, response *restful.Response) {
 	metricParamStr := request.QueryParameter("metric_param")
 
@@ -30,7 +38,9 @@ func GetMetrics(request *restful.Request, response *restful.Response) {
 }
 
 func GetEmail(request *restful.Request, response *restful.Response) {
+	resume := parseBool(request.QueryParameter("resume"))
 	notificationParamStr := request.QueryParameter("notification_param")
+	language := request.QueryParameter("language")
 
 	notificationParam := notification.NotificationParam{}
 
@@ -41,14 +51,37 @@ func GetEmail(request *restful.Request, response *restful.Response) {
 	}
 
 	tmpl := template.New("email")
-	tmpl.Parse(constants.EmailKubeSphereNotifyTemplate)
+	if resume {
+		if "en" == language {
+			tmpl.Parse(constants.EmailKubeSphereNotifyResumeTemplateEn)
+		} else {
+			tmpl.Parse(constants.EmailKubeSphereNotifyResumeTemplateZh)
+		}
+	} else {
+		if "en" == language {
+			tmpl.Parse(constants.EmailKubeSphereNotifyActiveTemplateEn)
+		} else {
+			tmpl.Parse(constants.EmailKubeSphereNotifyActiveTemplateZh)
+		}
+	}
 
 	var content bytes.Buffer
 	tmpl.Execute(&content, notificationParam)
 
+	emailContent := notification.EmailContent{
+		Html: content.String(),
+	}
+
+	emailContentBytes, err := json.Marshal(emailContent)
+
+	if err != nil {
+		logger.Error(nil, "Marshal Notification Content error: %v", err)
+		return
+	}
+
 	email := notification.Email{
 		Title:   "KubeSphere Notification",
-		Content: content.String(),
+		Content: string(emailContentBytes),
 	}
 
 	response.WriteAsJson(email)
