@@ -301,7 +301,7 @@ type TimeSeriesMetric struct {
 	MetricValues [][]interface{}        `json:"values"`
 }
 
-func getResourceTimeSeriesMetric(metricToRule map[string][]string, metricName string, metricStr string) []metric.ResourceMetrics {
+func getResourceTimeSeriesMetric(rsTypeName string, metricToRule map[string][]string, metricName string, metricStr string) []metric.ResourceMetrics {
 	defer func() {
 		if err := recover(); err != nil {
 			logger.Error(nil, "getResourceTimeSeriesMetric panic:", err)
@@ -318,7 +318,8 @@ func getResourceTimeSeriesMetric(metricToRule map[string][]string, metricName st
 	rms := []metric.ResourceMetrics{}
 
 	for i := 0; i < l; i++ {
-		if metrics.Results[i].MetricName != metricName {
+		if metrics.Results[i].MetricName != metricName ||
+			len(metrics.Results[i].Data.Result) == 0 {
 			continue
 		}
 
@@ -337,7 +338,7 @@ func getResourceTimeSeriesMetric(metricToRule map[string][]string, metricName st
 
 			for i := 0; i < len(instantMetrics); i++ {
 				metricInfo := instantMetrics[i].MetricInfo
-				resourceName := metricInfo["resource_name"].(string)
+				resourceName := metricInfo[rsTypeName].(string)
 
 				metricValue := instantMetrics[i].MetricValue
 				t, err := metricValue[0].(json.Number).Float64()
@@ -373,7 +374,7 @@ func getResourceTimeSeriesMetric(metricToRule map[string][]string, metricName st
 			for i := 0; i < len(timeRangeMetrics); i++ {
 				metricItem := timeRangeMetrics[i]
 				metricInfo := metricItem.MetricInfo
-				resourceName := metricInfo["resource_name"].(string)
+				resourceName := metricInfo[rsTypeName].(string)
 				metricValues := metricItem.MetricValues
 				var tvs []metric.TV
 				for i := 0; i < len(metricValues); i++ {
@@ -422,7 +423,7 @@ func GetMetric(rsTypeName string, rsTypeParam string, rsFilterName string, rsFil
 	resourceMetricsAll := []metric.ResourceMetrics{}
 
 	for _, mt := range metrics {
-		resourceMetrics := getResourceTimeSeriesMetric(metricToRule, mt, metricStr)
+		resourceMetrics := getResourceTimeSeriesMetric(rsTypeName, metricToRule, mt, metricStr)
 		for _, rm := range resourceMetrics {
 			resourceMetricsAll = append(resourceMetricsAll, rm)
 		}

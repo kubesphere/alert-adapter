@@ -19,6 +19,10 @@ import (
 type Config struct {
 	Log LogConfig
 
+	Ks struct {
+		ApiServerToken string
+	}
+
 	App struct {
 		AdapterPort    string `default:"8080"`
 		MonitoringHost string `default:"http://ks-apiserver.kubesphere-system.svc/kapis/monitoring.kubesphere.io/v1"`
