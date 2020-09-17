@@ -42,10 +42,18 @@ func SendMonitoringRequest(uriPath string, extraQueryParams string, metrics []st
 		queryParams = queryParams + "&" + extraQueryParams
 	}
 
-	if strings.HasPrefix(uriPath, "http://") || strings.HasPrefix(uriPath, "https://") {
-		urlStr = uriPath + "&" + queryParams
+	if strings.Contains(uriPath, "?") {
+		if strings.HasPrefix(uriPath, "http://") || strings.HasPrefix(uriPath, "https://") {
+			urlStr = uriPath + "&" + queryParams
+		} else {
+			urlStr = DefaultScheme + "://" + uriPath + "&" + queryParams
+		}
 	} else {
-		urlStr = DefaultScheme + "://" + uriPath + "&" + queryParams
+		if strings.HasPrefix(uriPath, "http://") || strings.HasPrefix(uriPath, "https://") {
+			urlStr = uriPath + "?" + queryParams
+		} else {
+			urlStr = DefaultScheme + "://" + uriPath + "?" + queryParams
+		}
 	}
 
 	logger.Info(nil, "SendMonitoringRequest %s", urlStr)
